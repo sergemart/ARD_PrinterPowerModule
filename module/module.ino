@@ -7,11 +7,13 @@
 #define SHUTDOWN_MONITOR_PIN 2
 #define SHUTDOWN_EXECUTE_PIN 0
 #define LED_PIN 1
-#define STARTUP_DELAY 7000   // Time interval to allow the printer boot up
+#define STARTUP_DELAY 7000          // Time interval to allow the printer boot up
+#define STANDBY_BLINK_PERIOD 2000   // Time period for standby signal
 
 bool isShutdownRequested = false;
 bool isShutdownExecuted = false;
-
+bool ledState = false;
+unsigned long lastMillis;           // Timer variable
 
 // ------------------------------------ Subroutines ------------------------------------
 
@@ -34,6 +36,22 @@ void doShutdown() {
 }
 
 
+// Invert the LED
+void invertLed() {
+  ledState = !ledState;
+  digitalWrite(LED_PIN, ledState);
+}
+
+
+// Blink the LED in time
+void blinkLed() {
+  if (millis() - lastMillis >= STANDBY_BLINK_PERIOD) {
+    lastMillis = millis();
+    invertLed();
+  }
+}
+
+
 // ------------------------------------ Core routines ------------------------------------
 
 // Arduino setup
@@ -51,12 +69,16 @@ void setup() {
 
 // Main loop
 void loop() {
+
 #ifdef DEBUG
   DigiKeyboard.println("loop() iterated");
   delay(2000);
 #endif
+
   if (!isShutdownRequested) monitorShutdownRequest();
   if (isShutdownRequested && !isShutdownExecuted) doShutdown();
+
+  blinkLed();
 }
 
 
