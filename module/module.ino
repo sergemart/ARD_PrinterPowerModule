@@ -6,6 +6,7 @@
 
 #define SHUTDOWN_MONITOR_PIN 2
 #define SHUTDOWN_EXECUTE_PIN 0
+#define LED_PIN 1
 #define STARTUP_DELAY 7000   // Time interval to allow the printer boot up
 
 bool isShutdownRequested = false;
@@ -39,8 +40,11 @@ void doShutdown() {
 void setup() {
   pinMode(SHUTDOWN_MONITOR_PIN, INPUT_PULLUP);
   pinMode(SHUTDOWN_EXECUTE_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
-  digitalWrite(SHUTDOWN_EXECUTE_PIN, HIGH);   // standby; the shutdown relay is activated on LOW
+  digitalWrite(SHUTDOWN_EXECUTE_PIN, HIGH);   // Standby; the shutdown relay activates on LOW
+  digitalWrite(LED_PIN, LOW);                 // Turn off the LED
+
   delay(STARTUP_DELAY);
 }
 
