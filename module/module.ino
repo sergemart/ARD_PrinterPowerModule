@@ -8,7 +8,8 @@
 #define SHUTDOWN_EXECUTE_PIN 0
 #define LED_PIN 1
 #define STARTUP_DELAY 7000          // Time interval to allow the printer boot up
-#define STANDBY_BLINK_PERIOD 2000   // Time period for standby signal
+#define STANDBY_BLINK_PERIOD 2000   // Time period for the LED signaling the STANDBY state
+#define SHUTDOWN_BLINK_PERIOD 500   // Time period for the LED signaling the SHUTDOWN_EXECUTED state
 
 bool isShutdownRequested = false;
 bool isShutdownExecuted = false;
@@ -43,9 +44,18 @@ void invertLed() {
 }
 
 
-// Blink the LED in time
-void blinkLed() {
+// Blink the LED indicating the STANDBY state
+void blinkLedForStandby() {
   if (millis() - lastMillis >= STANDBY_BLINK_PERIOD) {
+    lastMillis = millis();
+    invertLed();
+  }
+}
+
+
+// Blink the LED indicating the SHUTDOWN_EXECUTED state
+void blinkLedForShutdownExecuted() {
+  if (millis() - lastMillis >= SHUTDOWN_BLINK_PERIOD) {
     lastMillis = millis();
     invertLed();
   }
@@ -75,10 +85,17 @@ void loop() {
   delay(2000);
 #endif
 
-  if (!isShutdownRequested) monitorShutdownRequest();
-  if (isShutdownRequested && !isShutdownExecuted) doShutdown();
-
-  blinkLed();
+  if (!isShutdownRequested) {                         // STANDBY state
+    monitorShutdownRequest();
+    blinkLedForStandby();
+  } 
+  if (isShutdownRequested && !isShutdownExecuted) {   // STUTDOWN_REQUESTED state
+    doShutdown();
+  }
+  if (isShutdownExecuted) {                           // SHUTDOWN_EXECUTED state
+    blinkLedForShutdownExecuted();
+  }
+  
 }
 
 
