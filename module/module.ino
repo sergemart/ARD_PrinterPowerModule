@@ -7,9 +7,11 @@
 #define SHUTDOWN_MONITOR_PIN 2
 #define SHUTDOWN_EXECUTE_PIN 0
 #define LED_PIN 1
-#define STARTUP_DELAY 7000          // Time interval to allow the printer boot up
-#define STANDBY_BLINK_PERIOD 2000   // Time period for the LED signaling the STANDBY state
-#define SHUTDOWN_BLINK_PERIOD 500   // Time period for the LED signaling the SHUTDOWN_EXECUTED state
+#define STARTUP_DELAY 7000          // Time interval to allow the printer boot up, ms
+#define STANDBY_BLINK_PERIOD 2000   // Time period for the LED signaling the STANDBY state, ms
+#define SHUTDOWN_BLINK_PERIOD 500   // Time period for the LED signaling the SHUTDOWN_EXECUTED state, ms
+#define FILTER_COUNT 3              // Number of additional repeated readings to confirm a shutdown request
+#define FILTER_PERIOD 500           // Time interval between the repeated readings, ms
 
 bool isShutdownRequested = false;
 bool isShutdownExecuted = false;
@@ -32,6 +34,15 @@ void doShutdown() {
 #ifdef DEBUG
   DigiKeyboard.println("doShutdown() called");
 #endif
+
+  // Filter the event
+  for (byte i = 0; i < FILTER_COUNT; i++) {
+    delay(FILTER_PERIOD);
+    if (digitalRead(SHUTDOWN_MONITOR_PIN) == HIGH) {    // Repeat the reading and check if it is consistent
+      isShutdownRequested = false;                      // False positive, reset the flag and exit
+      return;
+    }
+  }                                                     // All the filter readings are consistent, preceed to shutdown
   digitalWrite(SHUTDOWN_EXECUTE_PIN, LOW);
   isShutdownExecuted = true;
 }
