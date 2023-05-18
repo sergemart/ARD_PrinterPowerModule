@@ -100,7 +100,7 @@ void loop() {
     monitorShutdownRequest();
     blinkLedForStandby();
   } 
-  if (isShutdownRequested && !isShutdownExecuted) {   // STUTDOWN_REQUESTED state
+  if (isShutdownRequested && !isShutdownExecuted) {   // SHUTDOWN_REQUESTED state
     doShutdown();
   }
   if (isShutdownExecuted) {                           // SHUTDOWN_EXECUTED state
